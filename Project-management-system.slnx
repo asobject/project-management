@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ddd/ProjectManagementSystem.API.csproj" />
+  <Project Path="ProjectManagementSystem.Application/ProjectManagementSystem.Application.csproj" Id="b93320fc-f517-42e5-aba9-ba7637d59dab" />
+  <Project Path="ProjectManagementSystem.Domain/ProjectManagementSystem.Domain.csproj" />
+  <Project Path="ProjectManagementSystem.Infrastructure/ProjectManagementSystem.Infrastructure.csproj" Id="8b5272d8-5cc1-4724-b01f-49845574a93e" />
+  <Project Path="Shared/Shared.csproj" Id="59176ac9-a9d1-49c5-8e70-044a6f0f18e9" />
+</Solution>
