@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProjectManagementSystem.Domain.Entities;
-using ProjectManagementSystem.Domain.ValueObjects;
+using ProjectManagementSystem.Domain.ValueObjects.Project;
 
 namespace ProjectManagementSystem.Infrastructure.Configurations;
 
@@ -15,32 +15,32 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
 
         builder.ComplexProperty(p => p.Name, b =>
         {
-            b.Property(p => p.Value)
+            b.Property(p => p.Name)
                 .IsRequired()
-                .HasMaxLength(CompanyNames.MAX_LENGTH)
+                .HasMaxLength(ProjectCompanyNames.MAX_LENGTH)
                 .HasColumnName("Name");
         });
         builder.ComplexProperty(p => p.CompanyNames, b =>
         {
             b.Property(p => p.CompanyNameForCostumer)
                 .IsRequired()
-                .HasMaxLength(CompanyNames.MAX_LENGTH)
+                .HasMaxLength(ProjectCompanyNames.MAX_LENGTH)
                 .HasColumnName("CompanyNameForCostumer");
 
             b.Property(p => p.CompanyNameForExecutor)
                 .IsRequired()
-                .HasMaxLength(CompanyNames.MAX_LENGTH)
+                .HasMaxLength(ProjectCompanyNames.MAX_LENGTH)
                 .HasColumnName("CompanyNameForExecutor");
         });
         builder.ComplexProperty(p => p.Priority, b =>
         {
             b.IsRequired();
-            b.Property(p => p.Value).HasColumnName("Priority");
+            b.Property(p => p.Priority).HasColumnName("Priority");
         });
         builder.ComplexProperty(p => p.Priority, b =>
         {
             b.IsRequired();
-            b.Property(p => p.Value).HasColumnName("Priority");
+            b.Property(p => p.Priority).HasColumnName("Priority");
         });
         builder.ComplexProperty(p => p.Periods, b =>
         {

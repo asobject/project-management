@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="ddd/ProjectManagementSystem.API.csproj" />
+  <Project Path="ProjectManagementSystem.API/ProjectManagementSystem.API.csproj" />
   <Project Path="ProjectManagementSystem.Application/ProjectManagementSystem.Application.csproj" Id="b93320fc-f517-42e5-aba9-ba7637d59dab" />
   <Project Path="ProjectManagementSystem.Domain/ProjectManagementSystem.Domain.csproj" />
   <Project Path="ProjectManagementSystem.Infrastructure/ProjectManagementSystem.Infrastructure.csproj" Id="8b5272d8-5cc1-4724-b01f-49845574a93e" />

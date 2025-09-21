@@ -1,21 +1,21 @@
 ﻿
 using CSharpFunctionalExtensions;
-using ProjectManagementSystem.Domain.ValueObjects;
+using ProjectManagementSystem.Domain.ValueObjects.Project;
 
 namespace ProjectManagementSystem.Domain.Entities;
 
 public class Project : Entity<Guid>
 {
-    public Name Name { get; } = null!;
-    public CompanyNames CompanyNames { get; } = null!;
-    public Periods Periods { get; } = null!;
-    public Priority Priority { get; } = null!;
+    public ProjectName Name { get; } = null!;
+    public ProjectCompanyNames CompanyNames { get; } = null!;
+    public ProjectPeriods Periods { get; } = null!;
+    public ProjectPriority Priority { get; } = null!;
     private Project() { }
     private Project(
-        Name name,
-        CompanyNames companyNames,
-        Periods periods,
-        Priority priority
+        ProjectName name,
+        ProjectCompanyNames companyNames,
+        ProjectPeriods periods,
+        ProjectPriority priority
         )
     {
         Name = name;
@@ -23,10 +23,10 @@ public class Project : Entity<Guid>
         Periods = periods;
         Priority = priority;
     }
-    public static Result<Project> Create(Name name,
-        CompanyNames companyNames,
-        Periods periods,
-        Priority priority)
+    public static Result<Project> Create(ProjectName name,
+        ProjectCompanyNames companyNames,
+        ProjectPeriods periods,
+        ProjectPriority priority)
     {
 
         var project = new Project(name, companyNames, periods, priority);

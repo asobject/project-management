@@ -2,23 +2,23 @@
 using CSharpFunctionalExtensions;
 using Shared.Errors;
 
-namespace ProjectManagementSystem.Domain.ValueObjects;
+namespace ProjectManagementSystem.Domain.ValueObjects.Project;
 
-public class Periods : ValueObject
+public class ProjectPeriods : ValueObject
 {
     public DateTimeOffset StartDate { get; }
     public DateTimeOffset EndDate { get; }
-    private Periods() { }
-    private Periods(DateTimeOffset startDate, DateTimeOffset endDate)
+    private ProjectPeriods() { }
+    private ProjectPeriods(DateTimeOffset startDate, DateTimeOffset endDate)
     {
         StartDate = startDate;
         EndDate = endDate;
     }
-    public static Result<Periods, Error> Create(DateTimeOffset startDate, DateTimeOffset endDate)
+    public static Result<ProjectPeriods, Error> Create(DateTimeOffset startDate, DateTimeOffset endDate)
     {
         if (startDate > endDate)
             return Error.Validation("startDate > endDate");
-        return new Periods(startDate, endDate);
+        return new ProjectPeriods(startDate, endDate);
     }
     protected override IEnumerable<IComparable> GetEqualityComponents()
     {
