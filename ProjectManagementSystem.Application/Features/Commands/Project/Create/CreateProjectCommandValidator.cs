@@ -10,17 +10,17 @@ public class CreateProjectCommandValidator : AbstractValidator<CreateProjectComm
     public CreateProjectCommandValidator()
     {
         RuleFor(x => x.Name)
-            .MaximumLength(ProjectName.MAX_LENGTH).When(x => !string.IsNullOrEmpty(x.Name));
+     .NotEmpty()
+     .MaximumLength(ProjectName.MAX_LENGTH);
 
         RuleFor(x => x.CompanyNameForCostumer)
-            .MaximumLength(ProjectCompanyNames.MAX_LENGTH)
-            .When(x => !string.IsNullOrEmpty(x.CompanyNameForCostumer));
+            .NotEmpty()
+            .MaximumLength(ProjectCompanyNames.MAX_LENGTH);
 
         RuleFor(x => x.CompanyNameForExecutor)
-            .MaximumLength(ProjectCompanyNames.MAX_LENGTH)
-            .When(x => !string.IsNullOrEmpty(x.CompanyNameForExecutor));
+            .NotEmpty()
+            .MaximumLength(ProjectCompanyNames.MAX_LENGTH);
         RuleFor(x => x.Priority)
-           .NotEmpty()
            .GreaterThanOrEqualTo(ProjectPriority.MinValue);
         RuleFor(x => x.StartDate)
            .NotEmpty();

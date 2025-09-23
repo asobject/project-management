@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using MediatR;
+using ProjectManagementSystem.API.Behaviors;
 using ProjectManagementSystem.API.Extensions;
 using ProjectManagementSystem.Application.Features.Commands.Project.Create;
 using ProjectManagementSystem.Domain.Entities;
@@ -18,7 +20,11 @@ public static class ConfigureService
         services.AddScoped<IRepository<Project, Guid>, Repository<Project, Guid>>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateProjectCommand).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(CreateProjectCommand).Assembly);
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+        });
 
         services.AddValidatorsFromAssembly(typeof(CreateProjectCommandValidator).Assembly);
 

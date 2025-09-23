@@ -14,10 +14,18 @@ public class ProjectName : ValueObject
     {
         Name = value;
     }
-    public static Result<ProjectName,Error> Create(string value)
+    public static Result<ProjectName, Error> Create(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) || value.Length > MAX_LENGTH)
-            return Error.Validation(null,nameof(ProjectName));
+        var errors = new List<Error>();
+
+        if (string.IsNullOrWhiteSpace(value))
+            errors.Add(Error.Validation("Name is required", nameof(ProjectName)));
+        else if (value.Length > MAX_LENGTH)
+            errors.Add(Error.Validation($"Name must be less than {MAX_LENGTH} characters", nameof(ProjectName)));
+
+        if (errors.Count != 0)
+            return Error.ValidationCollection(errors);
+
         return new ProjectName(value);
     }
     protected override IEnumerable<IComparable> GetEqualityComponents()

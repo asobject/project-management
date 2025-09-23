@@ -18,12 +18,18 @@ public class ProjectCompanyNames : ValueObject
     }
     public static Result<ProjectCompanyNames, Error> Create(string companyNameForCostumer, string companyNameForExecutor)
     {
-        if (string.IsNullOrWhiteSpace(companyNameForCostumer) || companyNameForCostumer.Length > MAX_LENGTH)
-            return Error.Validation(null, nameof(ProjectCompanyNames.CompanyNameForCostumer));
-        if (string.IsNullOrWhiteSpace(companyNameForExecutor) || companyNameForExecutor.Length > MAX_LENGTH)
-            return Error.Validation(null, nameof(ProjectCompanyNames.CompanyNameForExecutor));
+        var errors = new List<Error>();
 
-        return new ProjectCompanyNames(companyNameForCostumer,companyNameForExecutor);
+        if (string.IsNullOrWhiteSpace(companyNameForCostumer) || companyNameForCostumer.Length > MAX_LENGTH)
+            errors.Add(Error.Validation("Company name for customer is invalid", nameof(CompanyNameForCostumer)));
+
+        if (string.IsNullOrWhiteSpace(companyNameForExecutor) || companyNameForExecutor.Length > MAX_LENGTH)
+            errors.Add(Error.Validation("Company name for executor is invalid", nameof(CompanyNameForExecutor)));
+
+        if (errors.Count != 0)
+            return Error.ValidationCollection(errors);
+
+        return new ProjectCompanyNames(companyNameForCostumer, companyNameForExecutor);
     }
     protected override IEnumerable<IComparable> GetEqualityComponents()
     {

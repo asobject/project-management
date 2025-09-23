@@ -13,12 +13,16 @@ public class ProjectPriority : ValueObject
     {
         Priority = value;
     }
-    public static Result<ProjectPriority,Error> Create(int value)
+    public static Result<ProjectPriority, Error> Create(int value)
     {
+        var errors = new List<Error>();
+
         if (value < MinValue)
-        {
-            return Error.Validation($"Priority < {MinValue}");
-        }
+            errors.Add(Error.Validation($"Priority must be at least {MinValue}",nameof(Priority)));
+
+        if (errors.Count != 0)
+            return Error.ValidationCollection(errors);
+
         return new ProjectPriority(value);
     }
     protected override IEnumerable<IComparable> GetEqualityComponents()

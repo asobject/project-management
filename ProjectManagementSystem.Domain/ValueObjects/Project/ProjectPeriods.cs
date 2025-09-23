@@ -16,8 +16,14 @@ public class ProjectPeriods : ValueObject
     }
     public static Result<ProjectPeriods, Error> Create(DateTimeOffset startDate, DateTimeOffset endDate)
     {
+        var errors = new List<Error>();
+
         if (startDate > endDate)
-            return Error.Validation("startDate > endDate");
+            errors.Add(Error.Validation("Start date must be before end date"));
+
+        if (errors.Count != 0)
+            return Error.ValidationCollection(errors);
+
         return new ProjectPeriods(startDate, endDate);
     }
     protected override IEnumerable<IComparable> GetEqualityComponents()

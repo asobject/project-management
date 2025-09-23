@@ -1,6 +1,7 @@
 ﻿
 using CSharpFunctionalExtensions;
 using ProjectManagementSystem.Domain.ValueObjects.Project;
+using Shared.Errors;
 
 namespace ProjectManagementSystem.Domain.Entities;
 
@@ -23,13 +24,13 @@ public class Project : Entity<Guid>
         Periods = periods;
         Priority = priority;
     }
-    public static Result<Project> Create(ProjectName name,
-        ProjectCompanyNames companyNames,
-        ProjectPeriods periods,
-        ProjectPriority priority)
+    public static Result<Project, Error> Create(
+    ProjectName name,
+    ProjectCompanyNames companyNames,
+    ProjectPeriods periods,
+    ProjectPriority priority)
     {
-
         var project = new Project(name, companyNames, periods, priority);
-        return Result.Success(project);
+        return Result.Success<Project, Error>(project);
     }
 }

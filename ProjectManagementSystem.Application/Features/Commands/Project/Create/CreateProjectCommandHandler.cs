@@ -9,17 +9,70 @@ namespace ProjectManagementSystem.Application.Features.Commands.Project.Create;
 
 public class CreateProjectCommandHandler(IUnitOfWork unitOfWork, IRepository<Domain.Entities.Project, Guid> repository) : IRequestHandler<CreateProjectCommand, Result<CreateProjectResponse, Error>>
 {
-    public async Task<Result<CreateProjectResponse, Error>> Handle(CreateProjectCommand request, CancellationToken cancellationToken = default)
+    public async Task<Result<CreateProjectResponse, Error>> Handle(
+    CreateProjectCommand request,
+    CancellationToken cancellationToken = default)
     {
-        var name = ProjectName.Create(request.Name).Value;
-        var companyNames = ProjectCompanyNames.Create(request.CompanyNameForCostumer, request.CompanyNameForExecutor).Value;
-        var periods = ProjectPeriods.Create(request.StartDate, request.EndDate).Value;
-        var priority = ProjectPriority.Create(request.Priority).Value;
+        // Собираем все ошибки валидации
+        var errors = new List<Error>();
+
+        // Валидируем и собираем ошибки
+        var nameResult = ProjectName.Create(request.Name);
+        if (nameResult.IsFailure)
+        {
+            if (nameResult.Error is ErrorCollection collection)
+                errors.AddRange(collection.Errors);
+            else
+                errors.Add(nameResult.Error);
+        }
+
+        var companyNamesResult = ProjectCompanyNames.Create(
+            request.CompanyNameForCostumer,
+            request.CompanyNameForExecutor);
+        if (companyNamesResult.IsFailure)
+        {
+            if (companyNamesResult.Error is ErrorCollection collection)
+                errors.AddRange(collection.Errors);
+            else
+                errors.Add(companyNamesResult.Error);
+        }
+
+        var periodsResult = ProjectPeriods.Create(request.StartDate, request.EndDate);
+        if (periodsResult.IsFailure)
+        {
+            if (periodsResult.Error is ErrorCollection collection)
+                errors.AddRange(collection.Errors);
+            else
+                errors.Add(periodsResult.Error);
+        }
+
+        var priorityResult = ProjectPriority.Create(request.Priority);
+        if (priorityResult.IsFailure)
+        {
+            if (priorityResult.Error is ErrorCollection collection)
+                errors.AddRange(collection.Errors);
+            else
+                errors.Add(priorityResult.Error);
+        }
+
+        if (errors.Count != 0)
+            return Error.ValidationCollection(errors);
+
         if (await repository.ExistsAsync(p => p.Name.Name == request.Name))
-            return Error.AlreadyExists("Project already exists");
-        var project = Domain.Entities.Project.Create(name, companyNames, periods, priority).Value;
-        await repository.AddAsync(project, cancellationToken);
+            return Error.AlreadyExists("Project already exists", "Name");
+
+        var projectResult = Domain.Entities.Project.Create(
+            nameResult.Value,
+            companyNamesResult.Value,
+            periodsResult.Value,
+            priorityResult.Value);
+
+        if (projectResult.IsFailure)
+            return projectResult.Error;
+
+        await repository.AddAsync(projectResult.Value, cancellationToken);
         await unitOfWork.CompleteAsync(cancellationToken);
-        return new CreateProjectResponse(project.Id);
+
+        return new CreateProjectResponse(projectResult.Value.Id);
     }
 }
