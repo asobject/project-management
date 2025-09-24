@@ -49,6 +49,12 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
         }
 
         var valueType = responseType.GetGenericArguments()[0];
+        var errorType = responseType.GetGenericArguments()[1];
+
+        if (errorType != typeof(Error))
+        {
+            throw new InvalidOperationException($"TResponse must be Result<TValue,Error>. Actual error type: {errorType.FullName}");
+        }
 
         var failureMethod = typeof(Result)
             .GetMethods(BindingFlags.Public | BindingFlags.Static)
