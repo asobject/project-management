@@ -20,7 +20,15 @@ public class Repository<TEntity, TId>(ApplicationDbContext context) : IRepositor
         => (await _dbSet.AddAsync(entity, cancellationToken)).Entity.Id;
     public TId Update(TEntity entity)
         => _dbSet.Update(entity).Entity.Id;
+    public async Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default, params Expression<Func<TEntity, object>>[] includes)
+    {
+        IQueryable<TEntity> query = _dbSet.AsNoTracking();
 
+        foreach (var include in includes)
+            query = query.Include(include);
+
+        return await query.FirstOrDefaultAsync(predicate, cancellationToken);
+    }
     public TId Delete(TEntity entity)
         => _dbSet.Remove(entity).Entity.Id;
     public TId Save(TEntity entity)
@@ -52,4 +60,7 @@ public class Repository<TEntity, TId>(ApplicationDbContext context) : IRepositor
 
         return new PagedResultDTO<TEntity>(data, totalRecords);
     }
+
+    public async Task<TEntity?> FindAsync(TId id, CancellationToken cancellationToken = default)=>
+       await _dbSet.FindAsync([id], cancellationToken: cancellationToken);
 }

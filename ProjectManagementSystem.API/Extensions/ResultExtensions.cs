@@ -1,5 +1,4 @@
 ﻿using CSharpFunctionalExtensions;
-using CSharpFunctionalExtensions.ValueTasks;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Enums;
 using Shared.Errors;
@@ -9,11 +8,11 @@ namespace ProjectManagementSystem.API.Extensions;
 
 public static class ResultExtensions
 {
-    public static ObjectResult ToObjectResult<TValue>(this Result<TValue, Error> result)
+    public static ActionResult ToActionResult<TValue>(this Result<TValue, Error> result, int? successStatusCode = null,string? createdLocation = null)
     {
         if (result.IsSuccess)
         {
-            return new OkObjectResult(result.Value);
+            return CreateSuccessResult(result.Value, successStatusCode, createdLocation);
         }
 
         var error = result.Error;
@@ -45,6 +44,25 @@ public static class ResultExtensions
 
         return CreateErrorResult(error);
     }
+    private static ActionResult CreateSuccessResult<TValue>(TValue value, int? successStatusCode, string? createdLocation)
+    {
+        if (successStatusCode == 201)
+        {
+            if (!string.IsNullOrWhiteSpace(createdLocation))
+                return new CreatedResult(createdLocation, value);
+
+            return new ObjectResult(value) { StatusCode = 201 };
+        }
+
+        return successStatusCode switch
+        {
+            200 => new OkObjectResult(value),
+            202 => new AcceptedResult(),
+            204 => new NoContentResult(),
+            _ when successStatusCode.HasValue => new ObjectResult(value) { StatusCode = successStatusCode.Value },
+            _ => new OkObjectResult(value)
+        };
+    }
     private static ObjectResult CreateErrorResult(Error error)
     {
         var statusCode = error.Type.ToStatusCode();
@@ -52,7 +70,7 @@ public static class ResultExtensions
         return error.Type switch
         {
             ErrorType.Validation => new BadRequestObjectResult(new { error.Message, error.InvalidField }),
-            ErrorType.AlreadyExists => new ConflictObjectResult(new { error.Message }),
+           // ErrorType.AlreadyExists => new ConflictObjectResult(new { error.Message }),
             ErrorType.NotFound => new NotFoundObjectResult(new { error.Message }),
             ErrorType.Conflict => new ConflictObjectResult(new { error.Message }),
             ErrorType.Unauthorized => new UnauthorizedObjectResult(new { error.Message }),
@@ -60,19 +78,19 @@ public static class ResultExtensions
             _ => new ObjectResult(new { error.Message }) { StatusCode = statusCode }
         };
     }
-    public static ObjectResult ToActionResult(this Error error)
+    public static ActionResult ToActionResult(this Error error)
     {
         var statusCode = error.GetStatusCode();
 
         if (error is ErrorCollection collection)
         {
-            return collection.ToActionResult();
+            return collection.ToObjectResult();
         }
 
         return error.Type switch
         {
             ErrorType.Validation => new BadRequestObjectResult(new { error.Message, error.InvalidField }),
-            ErrorType.AlreadyExists => new ConflictObjectResult(new { error.Message }),
+           // ErrorType.AlreadyExists => new ConflictObjectResult(new { error.Message }),
             ErrorType.NotFound => new NotFoundObjectResult(new { error.Message }),
             ErrorType.Conflict => new ConflictObjectResult(new { error.Message }),
             ErrorType.Unauthorized => new UnauthorizedObjectResult(new { error.Message }),
@@ -81,7 +99,7 @@ public static class ResultExtensions
         };
     }
 
-    private static ObjectResult ToActionResult(this ErrorCollection collection)
+    private static ObjectResult ToObjectResult(this ErrorCollection collection)
     {
         var dominantErrorType = GetDominantErrorType(collection.Errors);
         var statusCode = dominantErrorType.ToStatusCode();
@@ -117,7 +135,7 @@ public static class ResultExtensions
             ErrorType.Unauthorized,
             ErrorType.Forbidden,
             ErrorType.NotFound,
-            ErrorType.AlreadyExists,
+           // ErrorType.AlreadyExists,
             ErrorType.Conflict,
             ErrorType.Validation,
             ErrorType.Failure
@@ -138,7 +156,7 @@ public static class ResultExtensions
         {
             ErrorType.Validation => 400,
             ErrorType.NotFound => 404,
-            ErrorType.AlreadyExists => 409,
+          //  ErrorType.AlreadyExists => 409,
             ErrorType.Conflict => 409,
             ErrorType.Unauthorized => 401,
             ErrorType.Forbidden => 403,
@@ -152,7 +170,7 @@ public static class ResultExtensions
         {
             ErrorType.Validation => "Validation error",
             ErrorType.NotFound => "Not found",
-            ErrorType.AlreadyExists => "Already exists",
+           // ErrorType.AlreadyExists => "Already exists",
             ErrorType.Conflict => "Conflict",
             ErrorType.Unauthorized => "Unauthorized",
             ErrorType.Forbidden => "Forbidden",

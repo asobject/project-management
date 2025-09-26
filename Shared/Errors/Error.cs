@@ -29,9 +29,9 @@ public record Error
                                  string? errorCode = null, Dictionary<string, object>? metadata = null)
         => new(ErrorType.Validation, message, invalidField, errorCode, metadata);
 
-    public static Error AlreadyExists(string message, string? invalidField = null,
-                                    string? errorCode = null, Dictionary<string, object>? metadata = null)
-        => new(ErrorType.AlreadyExists, message, invalidField, errorCode, metadata);
+    //public static Error AlreadyExists(string message, string? invalidField = null,
+    //                                string? errorCode = null, Dictionary<string, object>? metadata = null)
+    //    => new(ErrorType.AlreadyExists, message, invalidField, errorCode, metadata);
 
     public static Error Conflict(string message, string? invalidField = null,
                                string? errorCode = null, Dictionary<string, object>? metadata = null)

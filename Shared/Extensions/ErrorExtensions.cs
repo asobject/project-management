@@ -62,7 +62,7 @@ public static class ErrorExtensions
         {
             ErrorType.Validation => 400,
             ErrorType.NotFound => 404,
-            ErrorType.AlreadyExists => 409,
+            //ErrorType.AlreadyExists => 409,
             ErrorType.Conflict => 409,
             ErrorType.Unauthorized => 401,
             ErrorType.Forbidden => 403,

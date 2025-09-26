@@ -7,7 +7,8 @@ using Shared.Errors;
 
 namespace ProjectManagementSystem.Application.Features.Commands.Project.Create;
 
-public class CreateProjectCommandHandler(IUnitOfWork unitOfWork, IRepository<Domain.Entities.Project, Guid> repository) : IRequestHandler<CreateProjectCommand, Result<CreateProjectResponse, Error>>
+public class CreateProjectCommandHandler(IUnitOfWork unitOfWork, IRepository<Domain.Entities.Project, Guid> repository)
+    : IRequestHandler<CreateProjectCommand, Result<CreateProjectResponse, Error>>
 {
     public async Task<Result<CreateProjectResponse, Error>> Handle(
     CreateProjectCommand request,
@@ -59,7 +60,7 @@ public class CreateProjectCommandHandler(IUnitOfWork unitOfWork, IRepository<Dom
             return Error.ValidationCollection(errors);
 
         if (await repository.ExistsAsync(p => p.Name.Name == request.Name))
-            return Error.AlreadyExists("Project already exists", "Name");
+            return Error.Conflict("Project already exists", "Name");
 
         var projectResult = Domain.Entities.Project.Create(
             nameResult.Value,
