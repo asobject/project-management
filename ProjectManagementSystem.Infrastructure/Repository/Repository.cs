@@ -24,8 +24,7 @@ public class Repository<TEntity, TId>(ApplicationDbContext context) : IRepositor
     {
         IQueryable<TEntity> query = _dbSet.AsNoTracking();
 
-        foreach (var include in includes)
-            query = query.Include(include);
+        query = includes.Aggregate(query, (current, include) => current.Include(include));
 
         return await query.FirstOrDefaultAsync(predicate, cancellationToken);
     }
@@ -47,8 +46,7 @@ public class Repository<TEntity, TId>(ApplicationDbContext context) : IRepositor
         if (predicate != null)
             query = query.Where(predicate);
 
-        foreach (var include in includes)
-            query = query.Include(include);
+        query = includes.Aggregate(query, (current, include) => current.Include(include));
 
         int totalRecords = await query.CountAsync(cancellationToken);
 
@@ -61,6 +59,6 @@ public class Repository<TEntity, TId>(ApplicationDbContext context) : IRepositor
         return new PagedResultDTO<TEntity>(data, totalRecords);
     }
 
-    public async Task<TEntity?> FindAsync(TId id, CancellationToken cancellationToken = default)=>
-       await _dbSet.FindAsync([id], cancellationToken: cancellationToken);
+    public async Task<TEntity?> FindAsync(object?[]? keyValues, CancellationToken cancellationToken = default ) =>
+       await _dbSet.FindAsync(keyValues, cancellationToken: cancellationToken);
 }

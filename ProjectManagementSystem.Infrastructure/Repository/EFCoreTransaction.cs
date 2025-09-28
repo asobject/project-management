@@ -23,12 +23,10 @@ public class EFCoreTransaction(IDbContextTransaction transaction) : ITransaction
 
     public void Dispose()
     {
-        if (!_disposed)
-        {
-            transaction.Dispose();
-            _disposed = true;
-            GC.SuppressFinalize(this);
-        }
+        if (_disposed) return;
+        transaction.Dispose();
+        _disposed = true;
+        GC.SuppressFinalize(this);
     }
 
     public async ValueTask DisposeAsync()

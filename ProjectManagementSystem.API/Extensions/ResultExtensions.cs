@@ -17,51 +17,42 @@ public static class ResultExtensions
 
         var error = result.Error;
 
-        if (error is ErrorCollection collection)
+        if (error is not ErrorCollection collection) return CreateErrorResult(error);
+        var errorsDict = new Dictionary<string, string[]>();
+        foreach (var err in collection.Errors)
         {
-            var errorsDict = new Dictionary<string, string[]>();
-            foreach (var err in collection.Errors)
-            {
-                var field = err.InvalidField ?? "general";
-                if (errorsDict.TryGetValue(field, out string[]? value))
-                    errorsDict[field] = [.. value, err.Message];
-                else
-                    errorsDict[field] = [err.Message];
-            }
-
-            var dominantErrorType = GetDominantErrorType(collection.Errors);
-            var statusCode = dominantErrorType.ToStatusCode();
-
-            return new ObjectResult(new ValidationProblemDetails(errorsDict)
-            {
-                Title = GetErrorTitle(dominantErrorType),
-                Status = statusCode
-            })
-            {
-                StatusCode = statusCode
-            };
+            var field = err.InvalidField ?? "general";
+            if (errorsDict.TryGetValue(field, out string[]? value))
+                errorsDict[field] = [.. value, err.Message];
+            else
+                errorsDict[field] = [err.Message];
         }
 
-        return CreateErrorResult(error);
+        var dominantErrorType = GetDominantErrorType(collection.Errors);
+        var statusCode = dominantErrorType.ToStatusCode();
+
+        return new ObjectResult(new ValidationProblemDetails(errorsDict)
+        {
+            Title = GetErrorTitle(dominantErrorType),
+            Status = statusCode
+        })
+        {
+            StatusCode = statusCode
+        };
+
     }
     private static ActionResult CreateSuccessResult<TValue>(TValue value, int? successStatusCode, string? createdLocation)
     {
-        if (successStatusCode == 201)
-        {
-            if (!string.IsNullOrWhiteSpace(createdLocation))
-                return new CreatedResult(createdLocation, value);
-
-            return new ObjectResult(value) { StatusCode = 201 };
-        }
-
-        return successStatusCode switch
-        {
-            200 => new OkObjectResult(value),
-            202 => new AcceptedResult(),
-            204 => new NoContentResult(),
-            _ when successStatusCode.HasValue => new ObjectResult(value) { StatusCode = successStatusCode.Value },
-            _ => new OkObjectResult(value)
-        };
+        if (successStatusCode != 201)
+            return successStatusCode switch
+            {
+                200 => new OkObjectResult(value),
+                202 => new AcceptedResult(),
+                204 => new NoContentResult(),
+                not null => new ObjectResult(value) { StatusCode = successStatusCode.Value },
+                _ => new OkObjectResult(value)
+            };
+        return !string.IsNullOrWhiteSpace(createdLocation) ? new CreatedResult(createdLocation, value) : new ObjectResult(value) { StatusCode = 201 };
     }
     private static ObjectResult CreateErrorResult(Error error)
     {
@@ -141,13 +132,7 @@ public static class ResultExtensions
             ErrorType.Failure
         };
 
-        foreach (var errorType in priorityOrder)
-        {
-            if (errors.Any(e => e.Type == errorType))
-                return errorType;
-        }
-
-        return ErrorType.Validation;
+        return priorityOrder.FirstOrDefault(errorType => errors.Any(e => e.Type == errorType));
     }
 
     private static int ToStatusCode(this ErrorType errorType)

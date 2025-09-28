@@ -12,7 +12,7 @@ public interface IRepository<TEntity, TId>
 {
     Task<TId> AddAsync(TEntity entity, CancellationToken cancellationToken = default);
     Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default, params Expression<Func<TEntity, object>>[] includes);
-    Task<TEntity?> FindAsync(TId id, CancellationToken cancellationToken = default);
+    Task<TEntity?> FindAsync(object?[]? keyValues, CancellationToken cancellationToken = default);
     TId Save(TEntity entity);
     TId Delete(TEntity entity);
     TId Update(TEntity entity);

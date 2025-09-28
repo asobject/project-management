@@ -12,7 +12,7 @@ public class GetProjectQueryHandler(IRepository<Domain.Entities.Project, Guid> r
 {
     public async Task<Result<GetProjectResponse, Error>> Handle(GetProjectQuery request, CancellationToken cancellationToken)
     {
-        var project = await repository.FindAsync(request.Id,cancellationToken);
+        var project = await repository.FindAsync([request.Id],cancellationToken);
         if (project == null)
         {
             return Error.NotFound($"Project not found with id {request.Id}");
