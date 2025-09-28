@@ -8,10 +8,14 @@ namespace ProjectManagementSystem.API.Extensions;
 
 public static class ResultExtensions
 {
-    public static ActionResult ToActionResult<TValue>(this Result<TValue, Error> result, int? successStatusCode = null,string? createdLocation = null)
+    public static ActionResult ToActionResult<TValue>(
+        this Result<TValue, Error> result,
+        int? successStatusCode = null,
+        Func<TValue, string>? createdLocationFactory = null)
     {
         if (result.IsSuccess)
         {
+            var createdLocation = createdLocationFactory != null ? createdLocationFactory(result.Value) : null;
             return CreateSuccessResult(result.Value, successStatusCode, createdLocation);
         }
 
@@ -39,8 +43,8 @@ public static class ResultExtensions
         {
             StatusCode = statusCode
         };
-
     }
+
     private static ActionResult CreateSuccessResult<TValue>(TValue value, int? successStatusCode, string? createdLocation)
     {
         if (successStatusCode != 201)

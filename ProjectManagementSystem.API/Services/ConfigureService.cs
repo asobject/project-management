@@ -2,6 +2,7 @@
 using MediatR;
 using ProjectManagementSystem.API.Behaviors;
 using ProjectManagementSystem.API.Extensions;
+using ProjectManagementSystem.API.Middlewares;
 using ProjectManagementSystem.Application.Features.Commands.Project.Create;
 using ProjectManagementSystem.Domain.Entities;
 using ProjectManagementSystem.Infrastructure.Repository;
@@ -16,7 +17,7 @@ public static class ConfigureService
         services.ConfigureContextNpgsql(configuration);
         services.ConfigureSwagger();
 
-
+        services.AddHttpContextAccessor();
         services.AddScoped<IRepository<Project, Guid>, Repository<Project, Guid>>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -31,5 +32,6 @@ public static class ConfigureService
         services.AddControllers();
 
         services.AddLogging();
+        services.AddTransient<GlobalExceptionMiddleware>();
     }
 }
