@@ -94,11 +94,21 @@ public class UpdateProjectCommandHandler(IUnitOfWork unitOfWork, IRepository<Dom
         }
         if (errors.Count != 0)
             return Error.ValidationCollection(errors);
-        var existsProjectWithUpdateName = await repository.ExistsAsync(p => p.Name.Name == request.Command.Name && p.Id != project.Id);
-        if (existsProjectWithUpdateName)
-            return Error.Conflict($"Project already exists with name {request.Command.Name}");
-        var result = repository.Save(project);
-        await unitOfWork.CompleteAsync(cancellationToken);
-        return new UpdateProjectResponse(result);
+        await using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            var existsProjectWithUpdateName = await repository.ExistsAsync(p => p.Name.Value == request.Command.Name && p.Id != project.Id);
+            if (existsProjectWithUpdateName)
+                return Error.Conflict($"Project already exists with name {request.Command.Name}", nameof(request.Command.Name));
+            var result = repository.Save(project);
+            await unitOfWork.CompleteAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return new UpdateProjectResponse(result);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return Error.Failure("Error updating project");
+        }
     }
 }

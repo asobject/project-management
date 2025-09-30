@@ -19,10 +19,10 @@ public class GetProjectQueryHandler(IRepository<Domain.Entities.Project, Guid> r
         }
         return new GetProjectResponse(
             Id: project.Id,
-            Name: project.Name.Name,
+            Name: project.Name.Value,
             CompanyNameForCostumer: project.CompanyNames.CompanyNameForCostumer,
             CompanyNameForExecutor: project.CompanyNames.CompanyNameForExecutor,
-            Priority: project.Priority.Priority,
+            Priority: project.Priority.Value,
             StartDate: project.Periods.StartDate,
             EndDate: project.Periods.EndDate
             );

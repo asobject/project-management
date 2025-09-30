@@ -1,7 +1,7 @@
 ﻿namespace Shared.Contracts.Repository;
 
-public interface ITransaction : IAsyncDisposable,IDisposable
+public interface ITransaction : IAsyncDisposable, IDisposable
 {
-    Task CommitAsync();
-    Task RollbackAsync();
+    Task CommitAsync(CancellationToken cancellationToken = default);
+    Task RollbackAsync(CancellationToken cancellationToken = default);
 }

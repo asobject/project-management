@@ -14,10 +14,8 @@ public class CreateProjectCommandHandler(IUnitOfWork unitOfWork, IRepository<Dom
     CreateProjectCommand request,
     CancellationToken cancellationToken = default)
     {
-        // Собираем все ошибки валидации
         var errors = new List<Error>();
 
-        // Валидируем и собираем ошибки
         var nameResult = ProjectName.Create(request.Name);
         if (nameResult.IsFailure)
         {
@@ -59,21 +57,30 @@ public class CreateProjectCommandHandler(IUnitOfWork unitOfWork, IRepository<Dom
         if (errors.Count != 0)
             return Error.ValidationCollection(errors);
 
-        if (await repository.ExistsAsync(p => p.Name.Name == request.Name))
-            return Error.Conflict("Project already exists", "Name");
+        await using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            if (await repository.ExistsAsync(p => p.Name.Value == request.Name))
+                return Error.Conflict($"Project already exists with name {request.Name}", nameof(request.Name));
 
-        var projectResult = Domain.Entities.Project.Create(
-            nameResult.Value,
-            companyNamesResult.Value,
-            periodsResult.Value,
-            priorityResult.Value);
+            var projectResult = Domain.Entities.Project.Create(
+                nameResult.Value,
+                companyNamesResult.Value,
+                periodsResult.Value,
+                priorityResult.Value);
 
-        if (projectResult.IsFailure)
-            return projectResult.Error;
+            if (projectResult.IsFailure)
+                return projectResult.Error;
 
-        await repository.AddAsync(projectResult.Value, cancellationToken);
-        await unitOfWork.CompleteAsync(cancellationToken);
-
-        return new CreateProjectResponse(projectResult.Value.Id);
+            await repository.AddAsync(projectResult.Value, cancellationToken);
+            await unitOfWork.CompleteAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return new CreateProjectResponse(projectResult.Value.Id);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return Error.Failure("Error creating project");
+        }
     }
 }

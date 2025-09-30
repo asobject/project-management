@@ -11,11 +11,21 @@ public class DeleteProjectCommandHandler(IUnitOfWork unitOfWork, IRepository<Dom
 {
     public async Task<Result<DeleteProjectResponse, Error>> Handle(DeleteProjectCommand request, CancellationToken cancellationToken)
     {
-        var project = await repository.FindAsync([request.Id], cancellationToken);
-        if (project == null)
-            return Error.NotFound($"Project not found with id {request.Id}");
-        var result = repository.Delete(project);
-        await unitOfWork.CompleteAsync(cancellationToken);
-        return new DeleteProjectResponse(result);
+        await using var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            var project = await repository.FindAsync([request.Id], cancellationToken);
+            if (project == null)
+                return Error.NotFound($"Project not found with id {request.Id}");
+            var result = repository.Delete(project);
+            await unitOfWork.CompleteAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return new DeleteProjectResponse(result);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return Error.Failure("Error deleting project");
+        }
     }
 }

@@ -8,11 +8,11 @@ public class ProjectName : ValueObject
 {
     public const int MAX_LENGTH = 20;
 
-    public string Name { get; } = null!;
+    public string Value { get; } = null!;
     private ProjectName() { }
     private ProjectName(string value)
     {
-        Name = value;
+        Value = value;
     }
     public static Result<ProjectName, Error> Create(string value)
     {
@@ -30,6 +30,6 @@ public class ProjectName : ValueObject
     }
     protected override IEnumerable<IComparable> GetEqualityComponents()
     {
-        yield return Name;
+        yield return Value;
     }
 }

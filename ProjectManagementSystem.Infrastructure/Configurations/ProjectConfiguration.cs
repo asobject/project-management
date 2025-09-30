@@ -12,43 +12,43 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
     {
         builder.ToTable("Projects");
         builder.HasKey(p => p.Id);
-
-        builder.ComplexProperty(p => p.Name, b =>
+        builder.OwnsOne(p => p.Name, nameBuilder =>
         {
-            b.Property(p => p.Name)
+            nameBuilder.Property(n => n.Value)
                 .IsRequired()
-                .HasMaxLength(ProjectCompanyNames.MAX_LENGTH)
+                .HasMaxLength(ProjectName.MAX_LENGTH)
                 .HasColumnName("Name");
+            nameBuilder.HasIndex(n => n.Value).IsUnique();
         });
-        builder.ComplexProperty(p => p.CompanyNames, b =>
+
+
+        builder.OwnsOne(p => p.CompanyNames, companyNamesBuilder =>
         {
-            b.Property(p => p.CompanyNameForCostumer)
+            companyNamesBuilder.Property(cn => cn.CompanyNameForCostumer)
                 .IsRequired()
                 .HasMaxLength(ProjectCompanyNames.MAX_LENGTH)
                 .HasColumnName("CompanyNameForCostumer");
 
-            b.Property(p => p.CompanyNameForExecutor)
+            companyNamesBuilder.Property(cn => cn.CompanyNameForExecutor)
                 .IsRequired()
                 .HasMaxLength(ProjectCompanyNames.MAX_LENGTH)
                 .HasColumnName("CompanyNameForExecutor");
         });
-        builder.ComplexProperty(p => p.Priority, b =>
+
+        builder.OwnsOne(p => p.Priority, priorityBuilder =>
         {
-            b.IsRequired();
-            b.Property(p => p.Priority).HasColumnName("Priority");
+            priorityBuilder.Property(pr => pr.Value)
+                .IsRequired()
+                .HasColumnName("Priority");
         });
-        builder.ComplexProperty(p => p.Priority, b =>
+
+        builder.OwnsOne(p => p.Periods, periodsBuilder =>
         {
-            b.IsRequired();
-            b.Property(p => p.Priority).HasColumnName("Priority");
-        });
-        builder.ComplexProperty(p => p.Periods, b =>
-        {
-            b.Property(p => p.StartDate)
+            periodsBuilder.Property(pd => pd.StartDate)
                 .IsRequired()
                 .HasColumnName("StartDate");
 
-            b.Property(p => p.EndDate)
+            periodsBuilder.Property(pd => pd.EndDate)
                 .IsRequired()
                 .HasColumnName("EndDate");
         });
